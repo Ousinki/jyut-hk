@@ -21,7 +21,7 @@ export async function sendFeedbackEmail(data: FeedbackData): Promise<{ success: 
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   const to = process.env.SMTP_TO || 'support@ousin.cn';
-  const from = process.env.SMTP_FROM || user || 'no-reply@jyutping.app';
+  const from = process.env.SMTP_FROM || user || 'contact@jyut.hk';
 
   // Format HTML content
   const timestamp = new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' });
@@ -61,8 +61,11 @@ export async function sendFeedbackEmail(data: FeedbackData): Promise<{ success: 
     const transporter = nodemailer.createTransport({
       host,
       port,
-      secure,
+      secure: port === 465,
       auth: { user, pass },
+      tls: {
+        rejectUnauthorized: false,
+      },
     });
 
     const mailAttachments = (data.attachments || []).map((att) => ({
@@ -71,8 +74,10 @@ export async function sendFeedbackEmail(data: FeedbackData): Promise<{ success: 
       contentType: att.contentType,
     }));
 
+    const sender = user || from;
+
     await transporter.sendMail({
-      from: `"粤语词典反馈中心" <${from}>`,
+      from: `"JYUT.HK 粵語學習空間" <${sender}>`,
       to,
       replyTo: data.email || undefined,
       subject: `[用户反馈] ${data.email ? data.email + ' : ' : ''}${data.message.slice(0, 30)}...`,

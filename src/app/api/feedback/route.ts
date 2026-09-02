@@ -22,14 +22,20 @@ export async function POST(req: NextRequest) {
     const contentType = req.headers.get('content-type') || '';
     let message = '';
     let email = '';
+    let source = 'Chrome 擴展 & 官網門戶';
+    let version = '1.5.8';
+    let subject = '';
     const attachments: FeedbackAttachment[] = [];
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await req.formData();
-      message = (formData.get('message') as string) || '';
+      message = (formData.get('message') as string) || (formData.get('content') as string) || '';
       email = (formData.get('email') as string) || '';
+      source = (formData.get('source') as string) || (formData.get('from_name') as string) || source;
+      version = (formData.get('version') as string) || version;
+      subject = (formData.get('subject') as string) || '';
 
-      const fileKeys = ['attachment', 'attachment_2', 'attachment_3', 'file', 'image'];
+      const fileKeys = ['attachment', 'attachment_2', 'attachment_3', 'file', 'image', 'screenshot'];
       for (const key of fileKeys) {
         const file = formData.get(key);
         if (file && typeof file === 'object' && 'arrayBuffer' in file) {
@@ -44,22 +50,29 @@ export async function POST(req: NextRequest) {
       }
     } else if (contentType.includes('application/json')) {
       const body = await req.json();
-      message = body.message || '';
+      message = body.message || body.content || body.description || '';
       email = body.email || '';
+      source = body.source || body.from_name || source;
+      version = body.version || version;
+      subject = body.subject || '';
     }
 
     if (!message.trim()) {
       return NextResponse.json(
-        { success: false, message: '反馈内容不能为空' },
+        { success: false, message: '反饋內容不能為空' },
         { status: 400, headers: corsHeaders() }
       );
     }
 
+    // Combine subject into message if present
+    const finalMessage = subject ? `【主題】：${subject}\n\n${message}` : message;
+
     const result = await sendFeedbackEmail({
       email,
-      message,
+      message: finalMessage,
       attachments,
-      source: 'Chrome 扩展 & 官网门户',
+      source,
+      version,
     });
 
     return NextResponse.json(result, {
@@ -68,7 +81,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: unknown) {
     console.error('Feedback API error:', error);
-    const errMessage = error instanceof Error ? error.message : '服务器内部错误';
+    const errMessage = error instanceof Error ? error.message : '伺服器內部錯誤';
     return NextResponse.json(
       { success: false, message: errMessage },
       { status: 500, headers: corsHeaders() }
