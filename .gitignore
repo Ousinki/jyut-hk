@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local private info (never commit)
+DOMAIN_INFO.md
+SERVER_INFO.md
+
