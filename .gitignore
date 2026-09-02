@@ -45,3 +45,9 @@ DOMAIN_INFO.md
 SERVER_INFO.md
 
 test_smtp.cjs
+
+# Email preview debug tool
+scripts/preview-email.html
+scripts/header-capture.html
+scripts/capture-header.cjs
+scripts/send-preview.ts
