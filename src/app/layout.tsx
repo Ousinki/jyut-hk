@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
 import { Cinzel, Inter } from 'next/font/google';
+import { Providers } from '@/components/Providers';
 import './globals.css';
 
 const cinzel = Cinzel({
@@ -194,7 +195,7 @@ export default function RootLayout({
             } catch (e) {}
           `}
         </Script>
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

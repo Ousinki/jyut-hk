@@ -8,11 +8,13 @@ import { RoadmapTab } from '@/components/tabs/RoadmapTab';
 import { Footer } from '@/components/Footer';
 import { FeedbackModal } from '@/components/FeedbackModal';
 import { AuthModal } from '@/components/AuthModal';
+import { ProfileModal } from '@/components/ProfileModal';
 
 export default function Home() {
   const [currentTab, setCurrentTab] = useState<'home' | 'extension' | 'roadmap'>('home');
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     // Read hash on mount (e.g. #extension, #roadmap)
@@ -44,6 +46,7 @@ export default function Home() {
         onSelectTab={handleSelectTab}
         onOpenFeedback={() => setFeedbackOpen(true)}
         onOpenAuth={() => setAuthOpen(true)}
+        onOpenProfile={() => setProfileOpen(true)}
       />
 
       <main className="flex-1">
@@ -60,6 +63,9 @@ export default function Home() {
 
       {/* User Login & Register Modal */}
       <AuthModal isOpen={authOpen} onClose={() => setAuthOpen(false)} />
+
+      {/* User Center Profile Modal ("我的") */}
+      <ProfileModal isOpen={profileOpen} onClose={() => setProfileOpen(false)} />
     </div>
   );
 }

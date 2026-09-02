@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { MessageSquare, Menu, X, User } from 'lucide-react';
+import { MessageSquare, Menu, X, User as UserIcon, LogOut, Cloud, ChevronDown, CheckCircle2 } from 'lucide-react';
 import { GithubIcon } from './Icons';
 import { ThemeToggle } from './ThemeToggle';
+import { useAuth } from '@/context/AuthContext';
 
 export interface TabItem {
   id: string;
@@ -22,6 +23,7 @@ interface NavbarProps {
   onSelectTab: (tabId: string) => void;
   onOpenFeedback: () => void;
   onOpenAuth: () => void;
+  onOpenProfile: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -29,7 +31,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectTab,
   onOpenFeedback,
   onOpenAuth,
+  onOpenProfile,
 }) => {
+  const { user } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -78,42 +82,46 @@ export const Navbar: React.FC<NavbarProps> = ({
           ) : (
             <div className="flex items-center gap-3.5">
               <Image
-                src="/icon_15.png"
-                alt="Extension Logo"
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-xl shrink-0 shadow-xs group-hover:scale-105 transition-transform"
+                src="/logo-extension.svg"
+                alt="Jyutping Extension Logo"
+                width={46}
+                height={46}
+                className="w-[42px] h-[42px] sm:w-[46px] sm:h-[46px] shrink-0 drop-shadow-sm transition-transform duration-300 group-hover:scale-105"
               />
               <div className="flex flex-col">
-                <span className="font-bold text-xl sm:text-[22px] text-slate-900 dark:text-white leading-tight tracking-tight">
+                <span className="font-bold text-xl sm:text-2xl tracking-tight text-slate-900 dark:text-white leading-none">
                   粵語懸浮詞典
                 </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium tracking-wider uppercase">
-                  JYUTPING EXTENSION & PORTAL
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono tracking-wider pt-1">
+                  Jyutping Hover Dictionary
                 </span>
               </div>
             </div>
           )}
         </div>
 
-        {/* Center: Clean Minimalist 2 Tabs (首頁 / 懸浮擴展) */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+        {/* Center: Navigation Tabs */}
+        <nav className="hidden md:flex items-center gap-1.5 bg-slate-100/80 dark:bg-[#1c1b1e] p-1.5 rounded-full border border-slate-200/80 dark:border-[#2e2c33]">
           {TABS.map((tab) => {
             const isActive = currentTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`py-1 transition-colors cursor-pointer relative ${
+                className={`relative px-5 py-2 text-sm font-medium rounded-full transition-all duration-200 cursor-pointer ${
                   isActive
-                    ? 'text-[#8A1C1C] dark:text-[#f87171] font-bold'
-                    : 'text-slate-600 dark:text-slate-300 hover:text-[#8A1C1C] dark:hover:text-[#e05353]'
+                    ? 'text-white font-semibold shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-[#252429]'
                 }`}
+                style={
+                  isActive
+                    ? {
+                        background: 'linear-gradient(135deg, #8A1C1C 0%, #B42929 100%)',
+                      }
+                    : undefined
+                }
               >
                 {tab.label}
-                {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#8A1C1C] dark:bg-[#f87171] rounded-full" />
-                )}
               </button>
             );
           })}
@@ -121,11 +129,11 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: Actions */}
         <div className="hidden md:flex items-center gap-2">
-          {/* Feedback Button */}
+          {/* Feedback Trigger */}
           <button
             onClick={onOpenFeedback}
-            className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-[#1e1d21] transition-colors flex items-center gap-1 text-xs font-medium cursor-pointer"
-            title="意見反饋"
+            className="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-[#1e1d21] transition-colors cursor-pointer"
+            title="意見與反饋"
           >
             <MessageSquare className="w-4 h-4" />
           </button>
@@ -144,14 +152,37 @@ export const Navbar: React.FC<NavbarProps> = ({
             <GithubIcon className="w-4 h-4" />
           </a>
 
-          {/* User Login/Account Button */}
-          <button
-            onClick={onOpenAuth}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white rounded-lg bg-[#8A1C1C] hover:bg-[#B42929] shadow-sm active:scale-95 transition-all cursor-pointer ml-1"
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>登入 / 註冊</span>
-          </button>
+          {/* User Auth: Avatar Only */}
+          {user ? (
+            <button
+              onClick={onOpenProfile}
+              className="relative p-0.5 rounded-full ring-2 ring-slate-200 dark:ring-[#38363e] hover:ring-[#8A1C1C] dark:hover:ring-[#f87171] transition-all cursor-pointer shadow-xs active:scale-95 ml-1 group"
+              title={`我的學習空間 (${user.name})`}
+            >
+              {user.avatar ? (
+                <Image
+                  src={user.avatar}
+                  alt={user.name}
+                  width={30}
+                  height={30}
+                  unoptimized
+                  className="w-[30px] h-[30px] rounded-full object-cover transition-transform group-hover:scale-105"
+                />
+              ) : (
+                <div className="w-[30px] h-[30px] rounded-full bg-[#8A1C1C] text-white flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-105">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </button>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white rounded-lg bg-[#8A1C1C] hover:bg-[#B42929] shadow-sm active:scale-95 transition-all cursor-pointer ml-1"
+            >
+              <UserIcon className="w-3.5 h-3.5" />
+              <span>登入 / 註冊</span>
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -189,7 +220,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             );
           })}
 
-          <div className="pt-2 border-t border-slate-200 dark:border-[#2e2c33] flex items-center justify-between">
+          <div className="pt-3 border-t border-slate-200 dark:border-[#2e2c33] flex items-center justify-between">
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
@@ -199,15 +230,42 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <MessageSquare className="w-3.5 h-3.5" /> 意見反饋
             </button>
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAuth();
-              }}
-              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#8A1C1C] text-white"
-            >
-              登入 / 註冊
-            </button>
+
+            {user ? (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenProfile();
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-[#252429] text-slate-800 dark:text-slate-200 text-xs font-semibold cursor-pointer"
+              >
+                {user.avatar ? (
+                  <Image
+                    src={user.avatar}
+                    alt={user.name}
+                    width={22}
+                    height={22}
+                    unoptimized
+                    className="w-[22px] h-[22px] rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-[22px] h-[22px] rounded-full bg-[#8A1C1C] text-white flex items-center justify-center text-[10px] font-bold">
+                    {user.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span>我的</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#8A1C1C] text-white"
+              >
+                登入 / 註冊
+              </button>
+            )}
           </div>
         </div>
       )}
