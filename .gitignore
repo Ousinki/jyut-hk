@@ -44,3 +44,4 @@ next-env.d.ts
 DOMAIN_INFO.md
 SERVER_INFO.md
 
+test_smtp.cjs
